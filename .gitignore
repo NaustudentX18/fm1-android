@@ -1,4 +1,5 @@
 *.apk
+!fm1-emu.apk
 *.apk.idsig
 *.jks
 *.pass
