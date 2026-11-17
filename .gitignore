@@ -1,0 +1,5 @@
+*.apk
+*.apk.idsig
+*.jks
+*.pass
+.DS_Store

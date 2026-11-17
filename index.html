@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FM-1 for Android — play the pocket synth on your phone</title>
+  <meta name="description" content="Sideload the FM-1 emulator on an arm64 Android phone. Touch panel, audio, MIDI, and any .fwsc firmware. Built for the Galaxy S25.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://naustudentx18.github.io/fm1-android/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Righteous&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FFFBEB;
+      --ink: #0F172A;
+      --muted: #475569;
+      --card: #FFFFFF;
+      --line: #E7D3C4;
+      --amber: #D97706;
+      --rust: #9A3412;
+      --rust-ink: #FFFFFF;
+      --body: "Poppins", "Segoe UI", sans-serif;
+      --display: "Righteous", "Poppins", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    a { color: var(--rust); }
+    a:hover { color: #7C2D12; }
+    :focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 3px;
+    }
+    .skip {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      background: var(--ink);
+      color: white;
+      padding: 0.6rem 1rem;
+      z-index: 5;
+    }
+    .skip:focus { top: 1rem; }
+    .wrap { width: min(1080px, calc(100% - 2rem)); margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    .brand {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand span { color: var(--rust); font-family: var(--body); font-weight: 500; font-size: 0.85rem; margin-left: 0.4rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      min-height: 48px;
+      padding: 0.7rem 1.15rem;
+      border-radius: 999px;
+      border: 2px solid var(--rust);
+      background: var(--rust);
+      color: var(--rust-ink);
+      font: 600 1rem/1 var(--body);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 200ms ease, color 200ms ease, transform 200ms ease;
+    }
+    .btn:hover { background: #7C2D12; border-color: #7C2D12; color: white; }
+    .btn.ghost {
+      background: transparent;
+      color: var(--rust);
+    }
+    .btn.ghost:hover { background: #FDE8D8; color: #7C2D12; }
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 1.5rem 0 3rem;
+      align-items: center;
+    }
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 7vw, 4.4rem);
+      line-height: 1.05;
+      font-weight: 400;
+      margin: 0 0 0.8rem;
+    }
+    .lede { font-size: 1.125rem; color: var(--muted); margin: 0 0 1.4rem; max-width: 38rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+    .meta { color: var(--muted); font-size: 0.95rem; margin: 0; }
+    .meta code { font-size: 0.85em; }
+    .panel-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1.25rem;
+      padding: 1rem;
+    }
+    .panel-card figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 0.7rem; }
+    .facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 0 0 3.5rem;
+    }
+    .fact {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1rem 1.1rem;
+    }
+    .fact strong { display: block; font-size: 1.05rem; }
+    .fact span { color: var(--muted); }
+    section { margin: 0 0 3.5rem; }
+    h2 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 0.8rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.1rem 1.15rem;
+    }
+    article h3 { margin: 0.7rem 0 0.3rem; font-size: 1.05rem; }
+    article p { margin: 0; color: var(--muted); }
+    .icon { width: 28px; height: 28px; color: var(--rust); }
+    ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+    ol.steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 0.8rem;
+      align-items: start;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin: 0 0 0.75rem;
+    }
+    ol.steps li::before {
+      content: counter(step);
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 999px;
+      background: #FDE8D8;
+      color: var(--rust);
+      display: grid;
+      place-items: center;
+      font-weight: 600;
+    }
+    .note {
+      border-left: 4px solid var(--amber);
+      padding: 0.2rem 0 0.2rem 1rem;
+      color: var(--muted);
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 1.5rem 0 2.5rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    @media (min-width: 768px) {
+      .hero { grid-template-columns: 1.05fr 0.95fr; padding-top: 2.5rem; }
+      .facts { grid-template-columns: repeat(4, 1fr); }
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#download">Skip to download</a>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#top">FM-1 <span>Android</span></a>
+      <a class="btn" href="https://github.com/NaustudentX18/fm1-android/releases/latest/download/fm1-emu.apk">Download APK</a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div>
+          <h1>The pocket FM synth, on the phone.</h1>
+          <p class="lede">A native arm64 build of the FM-1 emulator. The touch panel, the screen, and the audio are the synth. Load any firmware package the real unit would take.</p>
+          <div class="actions" id="download">
+            <a class="btn" href="https://github.com/NaustudentX18/fm1-android/releases/latest/download/fm1-emu.apk">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg>
+              Download fm1-emu.apk
+            </a>
+            <a class="btn ghost" href="#install">How to install</a>
+          </div>
+          <p class="meta">4.2 MB · Android 11+ · arm64 only · SHA-256 <code>02891bd16442a4fcefa3913c540b40d403108168ac448134279cc987ffe35141</code></p>
+        </div>
+        <figure class="panel-card">
+          <svg viewBox="0 0 1280 820" role="img" aria-labelledby="panel-title panel-desc">
+            <title id="panel-title">FM-1 panel diagram</title>
+            <desc id="panel-desc">Layout of the on-screen panel: master and select knobs, the screen, four knobs, buttons, and the 27 keys.</desc>
+            <rect width="1280" height="820" rx="36" fill="#4A4D52"/>
+            <rect x="28" y="24" width="1224" height="772" rx="28" fill="#5E6166"/>
+            <rect x="370" y="42" width="480" height="480" rx="8" fill="#18191B"/>
+            <rect x="390" y="62" width="440" height="440" fill="#243028"/>
+            <text x="610" y="290" text-anchor="middle" fill="#C9C6BD" font-size="28" font-family="Poppins, sans-serif">240 × 240</text>
+            <g fill="none" stroke="#C9C6BD" stroke-width="8">
+              <circle cx="110" cy="135" r="44"/>
+              <circle cx="250" cy="135" r="44"/>
+              <circle cx="110" cy="295" r="44"/>
+              <circle cx="250" cy="295" r="44"/>
+              <circle cx="935" cy="120" r="36"/>
+              <circle cx="1027" cy="120" r="36"/>
+              <circle cx="1119" cy="120" r="36"/>
+              <circle cx="1211" cy="120" r="36"/>
+            </g>
+            <g fill="#D97706">
+              <circle cx="110" cy="108" r="6"/>
+              <circle cx="250" cy="108" r="6"/>
+              <circle cx="110" cy="268" r="6"/>
+              <circle cx="250" cy="268" r="6"/>
+            </g>
+            <g fill="#3B3D42">
+              <rect x="62" y="398" width="112" height="44" rx="9"/>
+              <rect x="186" y="398" width="112" height="44" rx="9"/>
+              <rect x="906" y="232" width="50" height="64" rx="9"/>
+              <rect x="964" y="232" width="50" height="64" rx="9"/>
+              <rect x="1022" y="232" width="50" height="64" rx="9"/>
+              <rect x="1080" y="232" width="50" height="64" rx="9"/>
+              <rect x="1138" y="232" width="50" height="64" rx="9"/>
+              <rect x="1196" y="232" width="50" height="64" rx="9"/>
+              <rect x="906" y="308" width="50" height="64" rx="9"/>
+              <rect x="964" y="308" width="50" height="64" rx="9"/>
+              <rect x="1022" y="308" width="50" height="64" rx="9"/>
+              <rect x="1080" y="308" width="50" height="64" rx="9"/>
+              <rect x="1138" y="308" width="50" height="64" rx="9"/>
+              <rect x="1196" y="308" width="50" height="64" rx="9"/>
+            </g>
+            <g fill="#6A5557">
+              <rect x="61" y="680" width="62" height="106" rx="31"/>
+              <rect x="134" y="680" width="62" height="106" rx="31"/>
+              <rect x="207" y="680" width="62" height="106" rx="31"/>
+              <rect x="280" y="680" width="62" height="106" rx="31"/>
+              <rect x="353" y="680" width="62" height="106" rx="31"/>
+              <rect x="426" y="680" width="62" height="106" rx="31"/>
+              <rect x="499" y="680" width="62" height="106" rx="31"/>
+              <rect x="572" y="680" width="62" height="106" rx="31"/>
+              <rect x="645" y="680" width="62" height="106" rx="31"/>
+              <rect x="718" y="680" width="62" height="106" rx="31"/>
+              <rect x="791" y="680" width="62" height="106" rx="31"/>
+              <rect x="864" y="680" width="62" height="106" rx="31"/>
+              <rect x="937" y="680" width="62" height="106" rx="31"/>
+              <rect x="1010" y="680" width="62" height="106" rx="31"/>
+              <rect x="1083" y="680" width="62" height="106" rx="31"/>
+              <rect x="1156" y="680" width="62" height="106" rx="31"/>
+            </g>
+          </svg>
+          <figcaption>The on-screen panel. Diagram of the layout, not a photo from a phone.</figcaption>
+        </figure>
+      </section>
+
+      <div class="facts">
+        <div class="fact"><strong>Galaxy S25</strong><span>arm64. Android 11 or newer.</span></div>
+        <div class="fact"><strong>Sideload</strong><span>Not on the Play Store.</span></div>
+        <div class="fact"><strong>Plays immediately</strong><span>A small synth is already inside.</span></div>
+        <div class="fact"><strong>Your firmwares</strong><span>Open any .fwsc package.</span></div>
+      </div>
+
+      <section>
+        <h2>What you can do</h2>
+        <div class="grid">
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V5h4"/><path d="M20 9V5h-4"/><path d="M4 15v4h4"/><path d="M20 15v4h-4"/><circle cx="12" cy="12" r="2"/></svg>
+            <h3>Play the panel</h3>
+            <p>Keys, buttons, and knobs. Press lower on a key for a harder velocity. Drag a knob to turn it. MASTER is the volume.</p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+            <h3>Hear it</h3>
+            <p>Stereo audio through the phone. The screen stays on while the app is open. USB or Bluetooth MIDI is accepted when Android already sees the device.</p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+            <h3>Open a firmware</h3>
+            <p>Use Open .fwsc for a community package or M-VAVE’s own FM-1.fwsc. Tick UC25 flash first if the real unit was sold since autumn 2026.</p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V7h18v12a2 2 0 0 1-2 2z"/><path d="M3 7l2-4h14l2 4"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>
+            <h3>Keep the saves</h3>
+            <p>Patches written by the firmware stay on the phone, one save per package. Switching firmwares does not wipe the other.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="install">
+        <h2>Install on a Samsung</h2>
+        <ol class="steps">
+          <li><div><strong>Download the APK.</strong> Use the button above. Chrome saves it to Downloads.</div></li>
+          <li><div><strong>Open the file.</strong> If the browser only shows a warning, open Files, then Downloads, then tap <code>fm1-emu.apk</code>.</div></li>
+          <li><div><strong>Allow the install.</strong> Settings, Security and privacy, Install unknown apps, then allow it for the app you opened the file from.</div></li>
+          <li><div><strong>Open FM-1.</strong> It starts in landscape and plays the bundled template. Open .fwsc when you want a different firmware.</div></li>
+        </ol>
+        <p class="note">This build has not been installed from this computer onto a phone yet. Wireless debugging rejected the computer’s key. The package itself is signed and is an arm64 APK.</p>
+      </section>
+
+      <section>
+        <h2>What is in the file</h2>
+        <p>The engine is <a href="https://github.com/joakimeriksson/fm1-emu">joakimeriksson/fm1-emu</a> 0.5.1, MIT. It already runs the JieLi AC791N, including the AArch64 JIT. This Android build adds the touch panel, audio, and the firmware picker. It is not a rewrite of the CPU, and it is not an M-VAVE product.</p>
+        <p>The firmware that plays on first launch is the <a href="https://github.com/charlesvestal/fm1-base">fm1-base</a> template, MPL-2.0. Other firmwares are their authors’ and are not in the APK.</p>
+        <p><a href="https://github.com/NaustudentX18/fm1-android/releases/latest">Release notes and checksum</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>FM-1 for Android · <a href="https://github.com/NaustudentX18/fm1-android">NaustudentX18/fm1-android</a></p>
+    </footer>
+  </div>
+</body>
+</html>
